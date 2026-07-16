@@ -116,7 +116,7 @@ Before you begin, ensure you have the following installed:
 1. **Clone the repository**
 ```bash
 git clone https://github.com/shadownebulax8-cmd/OmniCore-AI.git
-cd omni-agent-saas
+cd OmniCore-AI
 ```
 
 2. **Configure environment variables**
@@ -309,7 +309,7 @@ docker compose exec app python main.py seed-kb
 ## 📁 Project Structure
 
 ```
-omni-agent-saas/
+OmniCore-AI/
 ├── analytics/              # Real-time analytics and metrics
 │   ├── __init__.py
 │   └── metrics.py          # Usage tracking and performance monitoring
