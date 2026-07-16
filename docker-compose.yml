@@ -1,0 +1,99 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=omni_agent
+      - POSTGRES_PASSWORD=omni_agent_password
+      - POSTGRES_DB=omni_agent_saas
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U omni_agent"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8001:8000"    # host:8001 -> avoids clashing with the app's own :8000
+    volumes:
+      - chroma_data:/chroma/chroma
+
+  app:
+    build: .
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      chromadb:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=omni_agent
+      - POSTGRES_PASSWORD=omni_agent_password
+      - POSTGRES_DB=omni_agent_saas
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000   # internal container port, not the 8001 host mapping above
+
+  celery_worker:
+    build: .
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      chromadb:
+        condition: service_started
+    command: ["celery", "-A", "workers.celery_app", "worker", "--loglevel=info"]
+    volumes:
+      - ./data:/app/data
+    environment:
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=omni_agent
+      - POSTGRES_PASSWORD=omni_agent_password
+      - POSTGRES_DB=omni_agent_saas
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+
+  flower:
+    build: .
+    env_file: .env
+    depends_on:
+      - redis
+      - celery_worker
+    command: ["celery", "-A", "workers.celery_app", "flower", "--port=5555"]
+    ports:
+      - "5555:5555"
+    environment:
+      - REDIS_HOST=redis
+
+volumes:
+  redis_data:
+  postgres_data:
+  chroma_data:

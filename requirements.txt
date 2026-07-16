@@ -1,0 +1,37 @@
+# --- Web framework ---
+fastapi>=0.115
+uvicorn[standard]>=0.34
+python-multipart>=0.0.20
+typer>=0.15
+
+# --- Config & validation ---
+pydantic>=2.10
+pydantic-settings>=2.7
+email-validator>=2.2
+python-dotenv>=1.0
+
+# --- Async task queue ---
+celery>=5.4
+redis>=5.2
+flower>=2.0
+
+# --- Vector DB / RAG ---
+chromadb>=0.5
+sentence-transformers>=3.3
+
+# --- Agents ---
+crewai>=0.86
+crewai-tools>=0.25
+
+# --- Data / Excel ---
+pandas>=2.2
+openpyxl>=3.1
+
+# --- HTTP client (web_search tool) ---
+httpx>=0.28
+
+# --- Database ---
+asyncpg>=0.29
+
+# --- Testing ---
+pytest>=8.3

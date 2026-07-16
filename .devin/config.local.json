@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Exec(python)",
+      "Exec(docker compose)",
+      "Exec(docker-compose)",
+      "Exec(docker)"
+    ]
+  }
+}
